@@ -77,14 +77,15 @@
   }
   
   pre::-webkit-scrollbar-track {
-    @apply bg-muted/50;
+    background-color: hsl(var(--muted) / 0.5);
   }
   
   pre::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/50 rounded;
+    background-color: hsl(var(--muted-foreground) / 0.5);
+    border-radius: 0.25rem;
   }
   
   pre::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/70;
+    background-color: hsl(var(--muted-foreground) / 0.7);
   }
 }

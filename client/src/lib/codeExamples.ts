@@ -9,6 +9,7 @@ Provides integration with Splunk for security information and event management.
 import asyncio
 import json
 import logging
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
@@ -87,6 +88,143 @@ class SplunkMCPServer:
             except Exception as e:
                 self.logger.error(f"Search failed: {e}")
                 return {"error": str(e)}
+        
+        @self.server.tool("get-indexes")
+        async def get_indexes() -> List[Dict]:
+            """Get list of available Splunk indexes"""
+            try:
+                await self._ensure_authenticated()
+                
+                response = await self.client.get(
+                    f"https://{self.config.host}:{self.config.port}/services/data/indexes",
+                    headers={"Authorization": f"Splunk {self.session_key}"},
+                    params={"output_mode": "json", "count": 0}
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    return data.get("entry", [])
+                else:
+                    raise Exception(f"Failed to get indexes: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Get indexes failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("create-alert")
+        async def create_alert(name: str, search: str, cron_schedule: str, 
+                             email: Optional[str] = None) -> Dict:
+            """
+            Create a scheduled alert in Splunk
+            
+            Args:
+                name: Alert name
+                search: SPL search query for the alert
+                cron_schedule: Cron expression for scheduling
+                email: Optional email address for notifications
+            """
+            try:
+                await self._ensure_authenticated()
+                
+                alert_data = {
+                    "name": name,
+                    "search": search,
+                    "cron_schedule": cron_schedule,
+                    "is_scheduled": "1",
+                    "actions": "email" if email else ""
+                }
+                
+                if email:
+                    alert_data["action.email.to"] = email
+                
+                response = await self.client.post(
+                    f"https://{self.config.host}:{self.config.port}/services/saved/searches",
+                    data=alert_data,
+                    headers={"Authorization": f"Splunk {self.session_key}"}
+                )
+                
+                if response.status_code == 201:
+                    return {"status": "success", "message": f"Alert '{name}' created"}
+                else:
+                    raise Exception(f"Failed to create alert: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Create alert failed: {e}")
+                return {"error": str(e)}
+    
+    def _register_resources(self):
+        """Register available resources"""
+        
+        @self.server.resource("splunk://dashboards")
+        async def get_dashboards() -> TextContent:
+            """Get list of Splunk dashboards"""
+            try:
+                await self._ensure_authenticated()
+                
+                response = await self.client.get(
+                    f"https://{self.config.host}:{self.config.port}/services/data/ui/views",
+                    headers={"Authorization": f"Splunk {self.session_key}"},
+                    params={"output_mode": "json"}
+                )
+                
+                if response.status_code == 200:
+                    dashboards = response.json().get("entry", [])
+                    return TextContent(
+                        type="text",
+                        text=json.dumps(dashboards, indent=2)
+                    )
+                else:
+                    return ErrorContent(
+                        type="error",
+                        error=f"Failed to get dashboards: {response.text}"
+                    )
+                    
+            except Exception as e:
+                return ErrorContent(
+                    type="error",
+                    error=f"Error getting dashboards: {e}"
+                )
+    
+    async def _get_search_results(self, job_id: str) -> List[Dict]:
+        """Get results from a search job"""
+        max_attempts = 30
+        attempt = 0
+        
+        while attempt < max_attempts:
+            # Check job status
+            status_response = await self.client.get(
+                f"https://{self.config.host}:{self.config.port}/services/search/jobs/{job_id}",
+                headers={"Authorization": f"Splunk {self.session_key}"}
+            )
+            
+            if status_response.status_code == 200:
+                root = ET.fromstring(status_response.text)
+                dispatch_state = None
+                for entry in root.findall('.//{http://www.w3.org/2005/Atom}entry'):
+                    for content in entry.findall('.//{http://www.w3.org/2005/Atom}content'):
+                        for key in content.findall('.//s:key[@name="dispatchState"]', 
+                                                  {'s': 'http://dev.splunk.com/ns/rest'}):
+                            dispatch_state = key.text
+                            break
+                
+                if dispatch_state == "DONE":
+                    # Get results
+                    results_response = await self.client.get(
+                        f"https://{self.config.host}:{self.config.port}/services/search/jobs/{job_id}/results",
+                        headers={"Authorization": f"Splunk {self.session_key}"},
+                        params={"output_mode": "json"}
+                    )
+                    
+                    if results_response.status_code == 200:
+                        return results_response.json().get("results", [])
+                    
+                elif dispatch_state == "FAILED":
+                    raise Exception("Search job failed")
+            
+            await asyncio.sleep(1)
+            attempt += 1
+        
+        raise Exception("Search job timeout")
     
     async def _ensure_authenticated(self):
         """Ensure we have a valid session key"""
@@ -94,7 +232,7 @@ class SplunkMCPServer:
             return
             
         if not self.client:
-            self.client = httpx.AsyncClient(verify=self.config.verify_ssl)
+            self.client = httpx.AsyncClient(verify=self.config.verify_ssl, timeout=30.0)
         
         if self.config.token:
             self.session_key = self.config.token
@@ -112,8 +250,12 @@ class SplunkMCPServer:
             
             if response.status_code == 200:
                 # Parse session key from XML response
-                session_key = response.text.split('<sessionKey>')[1].split('</sessionKey>')[0]
-                self.session_key = session_key
+                root = ET.fromstring(response.text)
+                session_key_elem = root.find('.//{http://dev.splunk.com/ns/rest}sessionKey')
+                if session_key_elem is not None:
+                    self.session_key = session_key_elem.text
+                else:
+                    raise Exception("Session key not found in response")
             else:
                 raise Exception(f"Authentication failed: {response.text}")
 
@@ -125,6 +267,8 @@ class SplunkMCPServer:
 # Configuration and startup
 async def main():
     import os
+    logging.basicConfig(level=logging.INFO)
+    
     config = SplunkConfig(
         host=os.getenv("SPLUNK_HOST", "localhost"),
         port=int(os.getenv("SPLUNK_PORT", "8089")),
@@ -251,6 +395,251 @@ class CrowdStrikeMCPServer:
             except Exception as e:
                 self.logger.error(f"Search detections failed: {e}")
                 return {"error": str(e)}
+        
+        @self.server.tool("get-hosts")
+        async def get_hosts(filter_query: str = "", limit: int = 100) -> List[Dict]:
+            """
+            Get list of hosts/endpoints
+            
+            Args:
+                filter_query: FQL filter query (e.g., "platform_name:'Windows'")
+                limit: Maximum number of results
+            """
+            try:
+                await self._ensure_authenticated()
+                
+                params = {
+                    "limit": limit
+                }
+                if filter_query:
+                    params["filter"] = filter_query
+                
+                response = await self.client.get(
+                    f"{self.config.base_url}/devices/queries/devices/v1",
+                    headers=self._get_headers(),
+                    params=params
+                )
+                
+                if response.status_code == 200:
+                    device_ids = response.json().get("resources", [])
+                    
+                    if device_ids:
+                        # Get detailed device information
+                        details_response = await self.client.post(
+                            f"{self.config.base_url}/devices/entities/devices/v2",
+                            headers=self._get_headers(),
+                            json={"ids": device_ids}
+                        )
+                        
+                        if details_response.status_code == 200:
+                            return details_response.json().get("resources", [])
+                    
+                    return []
+                else:
+                    raise Exception(f"Failed to get hosts: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Get hosts failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("quarantine-host")
+        async def quarantine_host(device_id: str, action: str = "contain") -> Dict:
+            """
+            Quarantine or unquarantine a host
+            
+            Args:
+                device_id: Device ID to quarantine/unquarantine
+                action: Action to take ("contain" or "lift_containment")
+            """
+            try:
+                await self._ensure_authenticated()
+                
+                if action not in ["contain", "lift_containment"]:
+                    return {"error": "Invalid action. Use 'contain' or 'lift_containment'"}
+                
+                response = await self.client.post(
+                    f"{self.config.base_url}/devices/entities/devices-actions/v2",
+                    headers=self._get_headers(),
+                    params={"action_name": action},
+                    json={"ids": [device_id]}
+                )
+                
+                if response.status_code == 202:
+                    result = response.json()
+                    return {
+                        "status": "success",
+                        "action": action,
+                        "device_id": device_id,
+                        "batch_id": result.get("batch_id")
+                    }
+                else:
+                    raise Exception(f"Failed to {action} host: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Quarantine host failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("run-rtr-command")
+        async def run_rtr_command(device_id: str, command: str, 
+                                command_type: str = "runscript") -> Dict:
+            """
+            Run Real Time Response (RTR) command on a host
+            
+            Args:
+                device_id: Device ID to run command on
+                command: Command to execute
+                command_type: Type of command ("runscript", "get", "put")
+            """
+            try:
+                await self._ensure_authenticated()
+                
+                # Start RTR session
+                session_response = await self.client.post(
+                    f"{self.config.base_url}/real-time-response/entities/sessions/v1",
+                    headers=self._get_headers(),
+                    json={
+                        "device_id": device_id,
+                        "origin": "mcp-server"
+                    }
+                )
+                
+                if session_response.status_code != 201:
+                    raise Exception(f"Failed to create RTR session: {session_response.text}")
+                
+                session_id = session_response.json()["resources"][0]["session_id"]
+                
+                # Execute command
+                command_response = await self.client.post(
+                    f"{self.config.base_url}/real-time-response/entities/command/v1",
+                    headers=self._get_headers(),
+                    json={
+                        "session_id": session_id,
+                        "command_type": command_type,
+                        "raw_command": command
+                    }
+                )
+                
+                if command_response.status_code == 201:
+                    result = command_response.json()
+                    return {
+                        "status": "success",
+                        "session_id": session_id,
+                        "cloud_request_id": result.get("meta", {}).get("trace_id"),
+                        "stdout": result.get("resources", [{}])[0].get("stdout", ""),
+                        "stderr": result.get("resources", [{}])[0].get("stderr", "")
+                    }
+                else:
+                    raise Exception(f"Failed to execute command: {command_response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"RTR command failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("search-iocs")
+        async def search_iocs(types: List[str] = None, values: List[str] = None, 
+                            limit: int = 100) -> List[Dict]:
+            """
+            Search for Indicators of Compromise (IOCs)
+            
+            Args:
+                types: List of IOC types to search for
+                values: List of IOC values to search for
+                limit: Maximum number of results
+            """
+            try:
+                await self._ensure_authenticated()
+                
+                params = {
+                    "limit": limit
+                }
+                
+                if types:
+                    params["types"] = types
+                if values:
+                    params["values"] = values
+                
+                response = await self.client.get(
+                    f"{self.config.base_url}/indicators/queries/iocs/v1",
+                    headers=self._get_headers(),
+                    params=params
+                )
+                
+                if response.status_code == 200:
+                    ioc_ids = response.json().get("resources", [])
+                    
+                    if ioc_ids:
+                        # Get detailed IOC information
+                        details_response = await self.client.post(
+                            f"{self.config.base_url}/indicators/entities/iocs/GET/v1",
+                            headers=self._get_headers(),
+                            json={"ids": ioc_ids}
+                        )
+                        
+                        if details_response.status_code == 200:
+                            return details_response.json().get("resources", [])
+                    
+                    return []
+                else:
+                    raise Exception(f"Failed to search IOCs: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Search IOCs failed: {e}")
+                return {"error": str(e)}
+    
+    def _register_resources(self):
+        """Register available resources"""
+        
+        @self.server.resource("crowdstrike://incidents")
+        async def get_incidents() -> TextContent:
+            """Get list of security incidents"""
+            try:
+                await self._ensure_authenticated()
+                
+                response = await self.client.get(
+                    f"{self.config.base_url}/incidents/queries/incidents/v1",
+                    headers=self._get_headers(),
+                    params={"limit": 50, "sort": "created_timestamp.desc"}
+                )
+                
+                if response.status_code == 200:
+                    incident_ids = response.json().get("resources", [])
+                    
+                    if incident_ids:
+                        details_response = await self.client.post(
+                            f"{self.config.base_url}/incidents/entities/incidents/GET/v1",
+                            headers=self._get_headers(),
+                            json={"ids": incident_ids}
+                        )
+                        
+                        if details_response.status_code == 200:
+                            incidents = details_response.json().get("resources", [])
+                            return TextContent(
+                                type="text",
+                                text=json.dumps(incidents, indent=2)
+                            )
+                    
+                    return TextContent(
+                        type="text",
+                        text="No incidents found"
+                    )
+                else:
+                    return ErrorContent(
+                        type="error",
+                        error=f"Failed to get incidents: {response.text}"
+                    )
+                    
+            except Exception as e:
+                return ErrorContent(
+                    type="error",
+                    error=f"Error getting incidents: {e}"
+                )
+    
+    def _get_headers(self) -> Dict[str, str]:
+        """Get headers with authentication"""
+        return {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
     
     async def _ensure_authenticated(self):
         """Ensure we have a valid access token"""
@@ -258,7 +647,7 @@ class CrowdStrikeMCPServer:
             return
         
         if not self.client:
-            self.client = httpx.AsyncClient()
+            self.client = httpx.AsyncClient(timeout=30.0)
         
         # Get OAuth2 token
         auth_data = {
@@ -291,6 +680,8 @@ class CrowdStrikeMCPServer:
 # Configuration and startup
 async def main():
     import os
+    logging.basicConfig(level=logging.INFO)
+    
     config = CrowdStrikeConfig(
         client_id=os.getenv("CROWDSTRIKE_CLIENT_ID"),
         client_secret=os.getenv("CROWDSTRIKE_CLIENT_SECRET"),
@@ -390,6 +781,278 @@ class MicrosoftMISPServer:
             except Exception as e:
                 self.logger.error(f"Search events failed: {e}")
                 return {"error": str(e)}
+        
+        @self.server.tool("search-attributes")
+        async def search_attributes(value: str = "", type: str = "", 
+                                  category: str = "", limit: int = 100) -> List[Dict]:
+            """
+            Search MISP attributes (IOCs)
+            
+            Args:
+                value: Attribute value to search for
+                type: Attribute type (ip-dst, domain, md5, etc.)
+                category: Attribute category
+                limit: Maximum number of results
+            """
+            try:
+                await self._ensure_client()
+                
+                search_params = {
+                    "limit": limit,
+                    "returnFormat": "json"
+                }
+                
+                if value:
+                    search_params["value"] = value
+                if type:
+                    search_params["type"] = type
+                if category:
+                    search_params["category"] = category
+                
+                response = await self.client.post(
+                    f"{self.config.url}/attributes/restSearch",
+                    headers=self._get_headers(),
+                    json=search_params
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return result.get("response", {}).get("Attribute", [])
+                else:
+                    raise Exception(f"Failed to search attributes: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Search attributes failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("create-event")
+        async def create_event(info: str, distribution: int = 0, 
+                             threat_level_id: int = 3, analysis: int = 0) -> Dict:
+            """
+            Create a new MISP event
+            
+            Args:
+                info: Event description
+                distribution: Distribution level (0-4)
+                threat_level_id: Threat level (1-4)
+                analysis: Analysis status (0-2)
+            """
+            try:
+                await self._ensure_client()
+                
+                event_data = {
+                    "Event": {
+                        "info": info,
+                        "distribution": distribution,
+                        "threat_level_id": threat_level_id,
+                        "analysis": analysis
+                    }
+                }
+                
+                response = await self.client.post(
+                    f"{self.config.url}/events",
+                    headers=self._get_headers(),
+                    json=event_data
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return {
+                        "status": "success",
+                        "event_id": result.get("Event", {}).get("id"),
+                        "uuid": result.get("Event", {}).get("uuid")
+                    }
+                else:
+                    raise Exception(f"Failed to create event: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Create event failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("add-attribute")
+        async def add_attribute(event_id: str, type: str, value: str, 
+                              category: str = "Network activity", to_ids: bool = True) -> Dict:
+            """
+            Add an attribute to a MISP event
+            
+            Args:
+                event_id: Event ID to add attribute to
+                type: Attribute type (ip-dst, domain, md5, etc.)
+                value: Attribute value
+                category: Attribute category
+                to_ids: Whether to use for IDS signatures
+            """
+            try:
+                await self._ensure_client()
+                
+                attribute_data = {
+                    "Attribute": {
+                        "type": type,
+                        "value": value,
+                        "category": category,
+                        "to_ids": to_ids
+                    }
+                }
+                
+                response = await self.client.post(
+                    f"{self.config.url}/attributes/add/{event_id}",
+                    headers=self._get_headers(),
+                    json=attribute_data
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return {
+                        "status": "success",
+                        "attribute_id": result.get("Attribute", {}).get("id"),
+                        "uuid": result.get("Attribute", {}).get("uuid")
+                    }
+                else:
+                    raise Exception(f"Failed to add attribute: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Add attribute failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("publish-event")
+        async def publish_event(event_id: str) -> Dict:
+            """
+            Publish a MISP event
+            
+            Args:
+                event_id: Event ID to publish
+            """
+            try:
+                await self._ensure_client()
+                
+                response = await self.client.post(
+                    f"{self.config.url}/events/publish/{event_id}",
+                    headers=self._get_headers()
+                )
+                
+                if response.status_code == 200:
+                    return {"status": "success", "message": f"Event {event_id} published"}
+                else:
+                    raise Exception(f"Failed to publish event: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Publish event failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("get-taxonomies")
+        async def get_taxonomies() -> List[Dict]:
+            """Get list of available taxonomies"""
+            try:
+                await self._ensure_client()
+                
+                response = await self.client.get(
+                    f"{self.config.url}/taxonomies",
+                    headers=self._get_headers()
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return result.get("response", [])
+                else:
+                    raise Exception(f"Failed to get taxonomies: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Get taxonomies failed: {e}")
+                return {"error": str(e)}
+        
+        @self.server.tool("tag-event")
+        async def tag_event(event_id: str, tag: str) -> Dict:
+            """
+            Add a tag to a MISP event
+            
+            Args:
+                event_id: Event ID to tag
+                tag: Tag name to add
+            """
+            try:
+                await self._ensure_client()
+                
+                tag_data = {
+                    "Tag": {
+                        "name": tag
+                    }
+                }
+                
+                response = await self.client.post(
+                    f"{self.config.url}/events/addTag/{event_id}",
+                    headers=self._get_headers(),
+                    json=tag_data
+                )
+                
+                if response.status_code == 200:
+                    return {"status": "success", "message": f"Tag '{tag}' added to event {event_id}"}
+                else:
+                    raise Exception(f"Failed to tag event: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Tag event failed: {e}")
+                return {"error": str(e)}
+    
+    def _register_resources(self):
+        """Register available resources"""
+        
+        @self.server.resource("misp://organizations")
+        async def get_organizations() -> TextContent:
+            """Get list of MISP organizations"""
+            try:
+                await self._ensure_client()
+                
+                response = await self.client.get(
+                    f"{self.config.url}/organisations",
+                    headers=self._get_headers()
+                )
+                
+                if response.status_code == 200:
+                    organizations = response.json().get("response", [])
+                    return TextContent(
+                        type="text",
+                        text=json.dumps(organizations, indent=2)
+                    )
+                else:
+                    return ErrorContent(
+                        type="error",
+                        error=f"Failed to get organizations: {response.text}"
+                    )
+                    
+            except Exception as e:
+                return ErrorContent(
+                    type="error",
+                    error=f"Error getting organizations: {e}"
+                )
+        
+        @self.server.resource("misp://feeds")
+        async def get_feeds() -> TextContent:
+            """Get list of MISP feeds"""
+            try:
+                await self._ensure_client()
+                
+                response = await self.client.get(
+                    f"{self.config.url}/feeds",
+                    headers=self._get_headers()
+                )
+                
+                if response.status_code == 200:
+                    feeds = response.json().get("response", [])
+                    return TextContent(
+                        type="text",
+                        text=json.dumps(feeds, indent=2)
+                    )
+                else:
+                    return ErrorContent(
+                        type="error",
+                        error=f"Failed to get feeds: {response.text}"
+                    )
+                    
+            except Exception as e:
+                return ErrorContent(
+                    type="error",
+                    error=f"Error getting feeds: {e}"
+                )
     
     async def _ensure_client(self):
         """Ensure HTTP client is initialized"""
@@ -415,6 +1078,8 @@ class MicrosoftMISPServer:
 # Configuration and startup
 async def main():
     import os
+    logging.basicConfig(level=logging.INFO)
+    
     config = MISPConfig(
         url=os.getenv("MISP_URL", "https://your-misp-instance.com"),
         key=os.getenv("MISP_KEY"),
