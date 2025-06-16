@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server Documentation - Security Integrations</title>
+    <meta name="description" content="Documentation website showcasing MCP server source code for Splunk SIEM, CrowdStrike EDR, and Microsoft MISP integrations">
+    <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>🔐 Security MCP Server Documentation</h1>
+            <p>Model Context Protocol servers for security tool integrations</p>
+        </div>
+    </header>
+
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-links">
+                <a href="#all" class="nav-link active" data-category="all">All Examples</a>
+                <a href="#siem" class="nav-link" data-category="SIEM">SIEM</a>
+                <a href="#edr" class="nav-link" data-category="EDR">EDR</a>
+                <a href="#threat-intelligence" class="nav-link" data-category="Threat Intelligence">Threat Intelligence</a>
+            </div>
+            <div class="search-container">
+                <input type="text" id="search" placeholder="Search code examples..." class="search-input">
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="container">
+            <div class="examples-grid" id="examples-grid">
+                <div class="example-card" data-category="SIEM" data-tags="splunk siem security mcp">
+                    <div class="example-header">
+                        <h3>Splunk SIEM Integration</h3>
+                        <span class="category-badge">SIEM</span>
+                    </div>
+                    <p class="example-description">MCP server for Splunk SIEM integration with search and alert capabilities</p>
+                    <div class="example-tags">
+                        <span class="tag">splunk</span>
+                        <span class="tag">siem</span>
+                        <span class="tag">security</span>
+                        <span class="tag">mcp</span>
+                    </div>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="language">python</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python"># Splunk MCP Server
+import splunklib.client as client
+import splunklib.results as results
+
+class SplunkMCPServer:
+    def __init__(self, host, port, username, password):
+        self.service = client.connect(
+            host=host,
+            port=port,
+            username=username,
+            password=password
+        )
+    
+    def search_events(self, query, earliest_time="-24h"):
+        """Search Splunk events"""
+        search_query = f"search {query} earliest={earliest_time}"
+        job = self.service.jobs.create(search_query)
+        
+        # Wait for job completion
+        while not job.is_done():
+            time.sleep(1)
+        
+        return list(results.ResultsReader(job.results()))</code></pre>
+                    </div>
+                </div>
+
+                <div class="example-card" data-category="EDR" data-tags="crowdstrike edr endpoint mcp">
+                    <div class="example-header">
+                        <h3>CrowdStrike EDR Integration</h3>
+                        <span class="category-badge">EDR</span>
+                    </div>
+                    <p class="example-description">MCP server for CrowdStrike Falcon EDR with endpoint management</p>
+                    <div class="example-tags">
+                        <span class="tag">crowdstrike</span>
+                        <span class="tag">edr</span>
+                        <span class="tag">endpoint</span>
+                        <span class="tag">mcp</span>
+                    </div>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="language">python</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python"># CrowdStrike MCP Server
+import requests
+from falconpy import Hosts, Detects
+
+class CrowdStrikeMCPServer:
+    def __init__(self, client_id, client_secret):
+        self.hosts = Hosts(client_id=client_id, client_secret=client_secret)
+        self.detects = Detects(client_id=client_id, client_secret=client_secret)
+    
+    def get_hosts(self, limit=100):
+        """Get host information"""
+        response = self.hosts.query_devices_by_filter(limit=limit)
+        if response['status_code'] == 200:
+            host_ids = response['body']['resources']
+            return self.hosts.get_device_details(ids=host_ids)
+        return None
+    
+    def get_detections(self, limit=100):
+        """Get recent detections"""
+        response = self.detects.query_detects(limit=limit)
+        if response['status_code'] == 200:
+            detection_ids = response['body']['resources']
+            return self.detects.get_detect_summaries(ids=detection_ids)
+        return None</code></pre>
+                    </div>
+                </div>
+
+                <div class="example-card" data-category="Threat Intelligence" data-tags="misp threat-intelligence microsoft mcp">
+                    <div class="example-header">
+                        <h3>Microsoft MISP Integration</h3>
+                        <span class="category-badge">Threat Intelligence</span>
+                    </div>
+                    <p class="example-description">MCP server for Microsoft MISP threat intelligence platform</p>
+                    <div class="example-tags">
+                        <span class="tag">misp</span>
+                        <span class="tag">threat-intelligence</span>
+                        <span class="tag">microsoft</span>
+                        <span class="tag">mcp</span>
+                    </div>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="language">python</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python"># Microsoft MISP MCP Server
+import requests
+import json
+from datetime import datetime
+
+class MISPMCPServer:
+    def __init__(self, misp_url, api_key):
+        self.misp_url = misp_url.rstrip('/')
+        self.api_key = api_key
+        self.headers = {
+            'Authorization': api_key,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    
+    def search_events(self, tags=None, limit=100):
+        """Search MISP events"""
+        endpoint = f"{self.misp_url}/events/restSearch"
+        payload = {
+            'limit': limit,
+            'tags': tags or [],
+            'published': True
+        }
+        
+        response = requests.post(endpoint, headers=self.headers, json=payload)
+        if response.status_code == 200:
+            return response.json()
+        return None
+    
+    def get_attributes(self, event_id):
+        """Get attributes for an event"""
+        endpoint = f"{self.misp_url}/attributes/restSearch"
+        payload = {'eventid': event_id}
+        
+        response = requests.post(endpoint, headers=self.headers, json=payload)
+        if response.status_code == 200:
+            return response.json()
+        return None</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Security MCP Documentation. Built for GitHub Pages.</p>
+            <p>Repository: <a href="https://github.com/jmstar85/SecurityMCP" target="_blank">github.com/jmstar85/SecurityMCP</a></p>
+        </div>
+    </footer>
+
+    <script src="./assets/script.js"></script>
+</body>
+</html>
