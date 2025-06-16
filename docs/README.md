@@ -1,4 +1,4 @@
-# MCP Security Integration Servers
+# Security Infrastructure MCP Servers
 
 보안 플랫폼을 위한 포괄적인 MCP (Model Context Protocol) 서버 구현체입니다.
 
@@ -10,7 +10,7 @@
 
 ## 라이브 문서
 
-실시간 문서는 다음에서 확인할 수 있습니다: [GitHub Pages](https://jmstar85.github.io/SecurityMCP)
+실시간 문서는 다음에서 확인할 수 있습니다: [GitHub Pages](https://jmstar85.github.io/SecurityInfrastructure)
 
 ## 특징
 
