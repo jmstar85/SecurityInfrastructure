@@ -1,14 +1,14 @@
 modules = ["nodejs-20", "web", "postgresql-16"]
-run = "npm run dev"
+run = "node dist/start.js"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
 
 [deployment]
-deploymentTarget = "static"
-build = ["npm", "run", "build"]
-publicDir = "dist"
+deploymentTarget = "autoscale"
+build = ["node", "build-for-deployment.js"]
+publicDir = "dist/server/public"
 
 [[ports]]
 localPort = 5000
