@@ -22,12 +22,19 @@ When deploying on Replit, use these settings:
 
 **Deployment Type:** Autoscale (not Static)
 - This is a full-stack application with both client and server code
+- Static deployment will not work as it cannot run the Express server
 
 **Public Directory:** `dist/server/public`
-- This is where the built static files are located
+- This is where the built static files are located for production serving
+- The server will serve these files and handle API routes
 
 **Run Command:** `node dist/start.js`
 - This starts the Express server in production mode
+- The server runs on port 5000 and serves both API and static content
+
+**Build Command:** `node build-for-deployment.js`
+- This builds both frontend and backend for production
+- Creates the correct directory structure for deployment
 
 **Environment Variables:**
 - `NODE_ENV=production` (should be set automatically)
