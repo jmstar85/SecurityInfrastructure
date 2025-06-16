@@ -59,13 +59,14 @@ async function build() {
     console.log('🔧 Building backend...');
     await runCommand('npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist');
     
-    // Step 3: Build the frontend with a timeout
+    // Step 3: Build the frontend with shorter timeout
     console.log('📦 Building frontend...');
     try {
       await Promise.race([
-        runCommand('npx vite build'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Frontend build timeout')), 60000))
+        runCommand('npx vite build --mode production'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Frontend build timeout')), 30000))
       ]);
+      console.log('✅ Frontend build completed successfully');
     } catch (error) {
       console.warn('⚠️  Frontend build failed or timed out, creating minimal static files...');
       
