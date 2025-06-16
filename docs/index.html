@@ -1,191 +1,908 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCP Server Documentation - Security Integrations</title>
-    <meta name="description" content="Documentation website showcasing MCP server source code for Splunk SIEM, CrowdStrike EDR, and Microsoft MISP integrations">
+    <title>MCP Security Integration Servers</title>
+    <meta name="description" content="Comprehensive MCP (Model Context Protocol) server implementations for major security platforms including Splunk SIEM, CrowdStrike EDR, and Microsoft MISP.">
     <link rel="stylesheet" href="./assets/style.css">
 </head>
 <body>
     <header class="header">
         <div class="container">
-            <h1>🔐 Security MCP Server Documentation</h1>
-            <p>Model Context Protocol servers for security tool integrations</p>
+            <div class="search-container">
+                <input type="text" id="search" placeholder="Search documentation..." class="search-input">
+            </div>
         </div>
     </header>
 
-    <nav class="nav">
-        <div class="container">
+    <div class="main-layout">
+        <nav class="sidebar">
             <div class="nav-links">
-                <a href="#all" class="nav-link active" data-category="all">All Examples</a>
-                <a href="#siem" class="nav-link" data-category="SIEM">SIEM</a>
-                <a href="#edr" class="nav-link" data-category="EDR">EDR</a>
-                <a href="#threat-intelligence" class="nav-link" data-category="Threat Intelligence">Threat Intelligence</a>
+                <a href="#overview" class="nav-link active" data-section="overview">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 19c-5 0-8-4-8-8s3-8 8-8 8 4 8 8-3 8-8 8zm0-14c-3.5 0-6 2.5-6 6s2.5 6 6 6 6-2.5 6-6-2.5-6-6-6z"/>
+                    </svg>
+                    Overview
+                </a>
+                <a href="#splunk" class="nav-link" data-section="splunk">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zm-8-8H7v6h4v-6zm6-2h-4v8h4v-8z"/>
+                    </svg>
+                    Splunk SIEM
+                </a>
+                <a href="#crowdstrike" class="nav-link" data-section="crowdstrike">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                    </svg>
+                    CrowdStrike EDR
+                </a>
+                <a href="#misp" class="nav-link" data-section="misp">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Microsoft MISP
+                </a>
+                <a href="#docker" class="nav-link" data-section="docker">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5s-.96.06-1.42.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09C6.04 10.33 6 10.66 6 11v1h12v-1c0-.34-.04-.67-.09-1H20V8z"/>
+                    </svg>
+                    Container Setup
+                </a>
+                <a href="#tests" class="nav-link" data-section="tests">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 2v11h3v9l7-12h-4l3-8z"/>
+                    </svg>
+                    Testing
+                </a>
             </div>
-            <div class="search-container">
-                <input type="text" id="search" placeholder="Search code examples..." class="search-input">
-            </div>
-        </div>
-    </nav>
+        </nav>
 
-    <main class="main">
-        <div class="container">
-            <div class="examples-grid" id="examples-grid">
-                <div class="example-card" data-category="SIEM" data-tags="splunk siem security mcp">
-                    <div class="example-header">
-                        <h3>Splunk SIEM Integration</h3>
-                        <span class="category-badge">SIEM</span>
-                    </div>
-                    <p class="example-description">MCP server for Splunk SIEM integration with search and alert capabilities</p>
-                    <div class="example-tags">
-                        <span class="tag">splunk</span>
-                        <span class="tag">siem</span>
-                        <span class="tag">security</span>
-                        <span class="tag">mcp</span>
-                    </div>
-                    <div class="code-container">
-                        <div class="code-header">
-                            <span class="language">python</span>
-                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <main class="content">
+            <!-- Overview Section -->
+            <section id="overview" class="section active">
+                <div class="card">
+                    <div class="card-content">
+                        <h2 class="section-title">MCP Security Integration Servers</h2>
+                        <p class="section-description">
+                            Comprehensive MCP (Model Context Protocol) server implementations for major security platforms 
+                            including Splunk SIEM, CrowdStrike EDR, and Microsoft MISP.
+                        </p>
+                        
+                        <div class="overview-grid">
+                            <div class="overview-card">
+                                <div class="overview-header">
+                                    <svg class="overview-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #f97316;">
+                                        <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zm-8-8H7v6h4v-6zm6-2h-4v8h4v-8z"/>
+                                    </svg>
+                                    <h3>Splunk SIEM</h3>
+                                </div>
+                                <p>Security Information and Event Management integration with comprehensive search and analytics capabilities.</p>
+                            </div>
+                            
+                            <div class="overview-card">
+                                <div class="overview-header">
+                                    <svg class="overview-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                                    </svg>
+                                    <h3>CrowdStrike EDR</h3>
+                                </div>
+                                <p>Endpoint Detection and Response platform integration for threat hunting and incident response.</p>
+                            </div>
+                            
+                            <div class="overview-card">
+                                <div class="overview-header">
+                                    <svg class="overview-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #3b82f6;">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                    <h3>Microsoft MISP</h3>
+                                </div>
+                                <p>Malware Information Sharing Platform integration for threat intelligence sharing.</p>
+                            </div>
                         </div>
-                        <pre><code class="language-python"># Splunk MCP Server
-import splunklib.client as client
-import splunklib.results as results
+                    </div>
+                </div>
+            </section>
+
+            <!-- Splunk SIEM Section -->
+            <section id="splunk" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="section-title">
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #f97316;">
+                                <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zm-8-8H7v6h4v-6zm6-2h-4v8h4v-8z"/>
+                            </svg>
+                            Splunk SIEM MCP Server
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="code-section">
+                            <h3>Server Implementation</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="language">python</span>
+                                    <span class="filename">splunk_mcp_server.py</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>#!/usr/bin/env python3
+"""
+Splunk SIEM MCP Server
+Provides integration with Splunk for security information and event management.
+"""
+
+import asyncio
+import json
+import logging
+import xml.etree.ElementTree as ET
+from datetime import datetime
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
+import httpx
+from mcp import Server, Tool, Resource
+from mcp.types import TextContent, ErrorContent
+
+@dataclass
+class SplunkConfig:
+    """Splunk configuration parameters"""
+    host: str
+    port: int = 8089
+    username: str = ""
+    password: str = ""
+    token: Optional[str] = None
+    verify_ssl: bool = True
+    index: str = "main"
 
 class SplunkMCPServer:
-    def __init__(self, host, port, username, password):
-        self.service = client.connect(
-            host=host,
-            port=port,
-            username=username,
-            password=password
-        )
+    """MCP Server for Splunk SIEM integration"""
     
-    def search_events(self, query, earliest_time="-24h"):
-        """Search Splunk events"""
-        search_query = f"search {query} earliest={earliest_time}"
-        job = self.service.jobs.create(search_query)
+    def __init__(self, config: SplunkConfig):
+        self.config = config
+        self.server = Server("splunk-siem")
+        self.client: Optional[httpx.AsyncClient] = None
+        self.session_key: Optional[str] = None
+        self.logger = logging.getLogger(__name__)
         
-        # Wait for job completion
-        while not job.is_done():
-            time.sleep(1)
+        # Register tools and resources
+        self._register_tools()
+        self._register_resources()
+    
+    def _register_tools(self):
+        """Register available tools"""
         
-        return list(results.ResultsReader(job.results()))</code></pre>
+        @self.server.tool("search-events")
+        async def search_events(query: str, earliest_time: str = "-24h", 
+                              latest_time: str = "now", count: int = 100) -> List[Dict]:
+            """
+            Search Splunk events using SPL (Search Processing Language)
+            
+            Args:
+                query: SPL search query
+                earliest_time: Start time for search (e.g., "-24h", "-1d")
+                latest_time: End time for search (default: "now")
+                count: Maximum number of results to return
+            """
+            try:
+                await self._ensure_authenticated()
+                
+                search_params = {
+                    "search": f"search {query}",
+                    "earliest_time": earliest_time,
+                    "latest_time": latest_time,
+                    "count": count,
+                    "output_mode": "json"
+                }
+                
+                # Create search job
+                response = await self.client.post(
+                    f"https://{self.config.host}:{self.config.port}/services/search/jobs",
+                    data=search_params,
+                    headers={"Authorization": f"Splunk {self.session_key}"}
+                )
+                
+                if response.status_code != 201:
+                    raise Exception(f"Failed to create search job: {response.text}")
+                
+                # Parse job ID from response
+                job_id = response.text.split('<sid>')[1].split('</sid>')[0]
+                
+                # Wait for job completion and get results
+                results = await self._get_search_results(job_id)
+                return results
+                
+            except Exception as e:
+                self.logger.error(f"Search failed: {e}")
+                return {"error": str(e)}
+
+# Configuration and startup
+async def main():
+    import os
+    logging.basicConfig(level=logging.INFO)
+    
+    config = SplunkConfig(
+        host=os.getenv("SPLUNK_HOST", "localhost"),
+        port=int(os.getenv("SPLUNK_PORT", "8089")),
+        username=os.getenv("SPLUNK_USERNAME", ""),
+        password=os.getenv("SPLUNK_PASSWORD", ""),
+        token=os.getenv("SPLUNK_TOKEN"),
+        verify_ssl=os.getenv("SPLUNK_VERIFY_SSL", "true").lower() == "true"
+    )
+    
+    server = SplunkMCPServer(config)
+    await server.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="code-section">
+                            <h3>Configuration Example</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="language">yaml</span>
+                                    <span class="filename">splunk-config.yaml</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code># splunk-config.yaml
+splunk:
+  host: "your-splunk-server.com"
+  port: 8089
+  username: "admin"
+  password: "your-password"
+  # OR use token-based auth
+  token: "your-api-token"
+  verify_ssl: true
+  default_index: "security"
+
+# Environment variables (.env)
+SPLUNK_HOST=your-splunk-server.com
+SPLUNK_PORT=8089
+SPLUNK_USERNAME=admin
+SPLUNK_PASSWORD=your-password
+SPLUNK_TOKEN=your-api-token
+SPLUNK_VERIFY_SSL=true</code></pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </section>
 
-                <div class="example-card" data-category="EDR" data-tags="crowdstrike edr endpoint mcp">
-                    <div class="example-header">
-                        <h3>CrowdStrike EDR Integration</h3>
-                        <span class="category-badge">EDR</span>
+            <!-- CrowdStrike EDR Section -->
+            <section id="crowdstrike" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="section-title">
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                            </svg>
+                            CrowdStrike EDR MCP Server
+                        </h2>
                     </div>
-                    <p class="example-description">MCP server for CrowdStrike Falcon EDR with endpoint management</p>
-                    <div class="example-tags">
-                        <span class="tag">crowdstrike</span>
-                        <span class="tag">edr</span>
-                        <span class="tag">endpoint</span>
-                        <span class="tag">mcp</span>
-                    </div>
-                    <div class="code-container">
-                        <div class="code-header">
-                            <span class="language">python</span>
-                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                        </div>
-                        <pre><code class="language-python"># CrowdStrike MCP Server
-import requests
-from falconpy import Hosts, Detects
+                    <div class="card-content">
+                        <div class="code-section">
+                            <h3>Server Implementation</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="language">python</span>
+                                    <span class="filename">crowdstrike_mcp_server.py</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>#!/usr/bin/env python3
+"""
+CrowdStrike EDR MCP Server
+Provides integration with CrowdStrike Falcon platform for endpoint detection and response.
+"""
+
+import asyncio
+import json
+import logging
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
+import httpx
+from mcp import Server, Tool, Resource
+from mcp.types import TextContent, ErrorContent
+
+@dataclass
+class CrowdStrikeConfig:
+    """CrowdStrike configuration parameters"""
+    client_id: str
+    client_secret: str
+    base_url: str = "https://api.crowdstrike.com"
+    member_cid: Optional[str] = None  # For MSSP scenarios
 
 class CrowdStrikeMCPServer:
-    def __init__(self, client_id, client_secret):
-        self.hosts = Hosts(client_id=client_id, client_secret=client_secret)
-        self.detects = Detects(client_id=client_id, client_secret=client_secret)
+    """MCP Server for CrowdStrike EDR integration"""
     
-    def get_hosts(self, limit=100):
-        """Get host information"""
-        response = self.hosts.query_devices_by_filter(limit=limit)
-        if response['status_code'] == 200:
-            host_ids = response['body']['resources']
-            return self.hosts.get_device_details(ids=host_ids)
-        return None
+    def __init__(self, config: CrowdStrikeConfig):
+        self.config = config
+        self.server = Server("crowdstrike-edr")
+        self.client: Optional[httpx.AsyncClient] = None
+        self.access_token: Optional[str] = None
+        self.token_expires: Optional[datetime] = None
+        self.logger = logging.getLogger(__name__)
+        
+        # Register tools and resources
+        self._register_tools()
+        self._register_resources()
     
-    def get_detections(self, limit=100):
-        """Get recent detections"""
-        response = self.detects.query_detects(limit=limit)
-        if response['status_code'] == 200:
-            detection_ids = response['body']['resources']
-            return self.detects.get_detect_summaries(ids=detection_ids)
-        return None</code></pre>
+    def _register_tools(self):
+        """Register available tools"""
+        
+        @self.server.tool("search-detections")
+        async def search_detections(filter_query: str = "", limit: int = 100, 
+                                  sort: str = "created_timestamp.desc") -> List[Dict]:
+            """
+            Search for detections in CrowdStrike
+            
+            Args:
+                filter_query: FQL filter query (e.g., "status:'new'+severity:'medium'")
+                limit: Maximum number of results
+                sort: Sort order (e.g., "created_timestamp.desc")
+            """
+            try:
+                await self._ensure_authenticated()
+                
+                params = {
+                    "limit": limit,
+                    "sort": sort
+                }
+                if filter_query:
+                    params["filter"] = filter_query
+                
+                response = await self.client.get(
+                    f"{self.config.base_url}/detects/queries/detects/v1",
+                    headers=self._get_headers(),
+                    params=params
+                )
+                
+                if response.status_code == 200:
+                    detection_ids = response.json().get("resources", [])
+                    
+                    if detection_ids:
+                        # Get detailed detection information
+                        details_response = await self.client.post(
+                            f"{self.config.base_url}/detects/entities/summaries/GET/v1",
+                            headers=self._get_headers(),
+                            json={"ids": detection_ids}
+                        )
+                        
+                        if details_response.status_code == 200:
+                            return details_response.json().get("resources", [])
+                    
+                    return []
+                else:
+                    raise Exception(f"Failed to search detections: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Search detections failed: {e}")
+                return {"error": str(e)}
+
+# Configuration and startup
+async def main():
+    import os
+    logging.basicConfig(level=logging.INFO)
+    
+    config = CrowdStrikeConfig(
+        client_id=os.getenv("CROWDSTRIKE_CLIENT_ID", ""),
+        client_secret=os.getenv("CROWDSTRIKE_CLIENT_SECRET", ""),
+        base_url=os.getenv("CROWDSTRIKE_BASE_URL", "https://api.crowdstrike.com")
+    )
+    
+    server = CrowdStrikeMCPServer(config)
+    await server.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </section>
 
-                <div class="example-card" data-category="Threat Intelligence" data-tags="misp threat-intelligence microsoft mcp">
-                    <div class="example-header">
-                        <h3>Microsoft MISP Integration</h3>
-                        <span class="category-badge">Threat Intelligence</span>
+            <!-- Microsoft MISP Section -->
+            <section id="misp" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="section-title">
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #3b82f6;">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            Microsoft MISP MCP Server
+                        </h2>
                     </div>
-                    <p class="example-description">MCP server for Microsoft MISP threat intelligence platform</p>
-                    <div class="example-tags">
-                        <span class="tag">misp</span>
-                        <span class="tag">threat-intelligence</span>
-                        <span class="tag">microsoft</span>
-                        <span class="tag">mcp</span>
-                    </div>
-                    <div class="code-container">
-                        <div class="code-header">
-                            <span class="language">python</span>
-                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                        </div>
-                        <pre><code class="language-python"># Microsoft MISP MCP Server
-import requests
+                    <div class="card-content">
+                        <div class="code-section">
+                            <h3>Server Implementation</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="language">python</span>
+                                    <span class="filename">misp_mcp_server.py</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>#!/usr/bin/env python3
+"""
+Microsoft MISP MCP Server
+Provides integration with MISP (Malware Information Sharing Platform) for threat intelligence.
+"""
+
+import asyncio
 import json
-from datetime import datetime
+import logging
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any, Union
+from dataclasses import dataclass
+import httpx
+from mcp import Server, Tool, Resource
+from mcp.types import TextContent, ErrorContent
 
-class MISPMCPServer:
-    def __init__(self, misp_url, api_key):
-        self.misp_url = misp_url.rstrip('/')
-        self.api_key = api_key
-        self.headers = {
-            'Authorization': api_key,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
+@dataclass
+class MISPConfig:
+    """MISP configuration parameters"""
+    url: str
+    key: str
+    verifycert: bool = True
+    proxies: Optional[Dict] = None
+    cert: Optional[str] = None
+    timeout: int = 300
+
+class MicrosoftMISPServer:
+    """MCP Server for Microsoft MISP integration"""
     
-    def search_events(self, tags=None, limit=100):
-        """Search MISP events"""
-        endpoint = f"{self.misp_url}/events/restSearch"
-        payload = {
-            'limit': limit,
-            'tags': tags or [],
-            'published': True
-        }
+    def __init__(self, config: MISPConfig):
+        self.config = config
+        self.server = Server("microsoft-misp")
+        self.client: Optional[httpx.AsyncClient] = None
+        self.logger = logging.getLogger(__name__)
         
-        response = requests.post(endpoint, headers=self.headers, json=payload)
-        if response.status_code == 200:
-            return response.json()
-        return None
+        # Register tools and resources
+        self._register_tools()
+        self._register_resources()
     
-    def get_attributes(self, event_id):
-        """Get attributes for an event"""
-        endpoint = f"{self.misp_url}/attributes/restSearch"
-        payload = {'eventid': event_id}
+    def _register_tools(self):
+        """Register available tools"""
         
-        response = requests.post(endpoint, headers=self.headers, json=payload)
-        if response.status_code == 200:
-            return response.json()
-        return None</code></pre>
+        @self.server.tool("search-events")
+        async def search_events(query: str = "", limit: int = 100, 
+                              event_type: str = "", published: bool = None) -> List[Dict]:
+            """
+            Search MISP events
+            
+            Args:
+                query: Search query string
+                limit: Maximum number of results
+                event_type: Filter by event type
+                published: Filter by published status
+            """
+            try:
+                await self._ensure_client()
+                
+                search_params = {
+                    "limit": limit,
+                    "returnFormat": "json"
+                }
+                
+                if query:
+                    search_params["eventinfo"] = query
+                if event_type:
+                    search_params["type"] = event_type
+                if published is not None:
+                    search_params["published"] = published
+                
+                response = await self.client.post(
+                    f"{self.config.url}/events/restSearch",
+                    headers=self._get_headers(),
+                    json=search_params
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return result.get("response", [])
+                else:
+                    raise Exception(f"Failed to search events: {response.text}")
+                    
+            except Exception as e:
+                self.logger.error(f"Search events failed: {e}")
+                return {"error": str(e)}
+
+# Configuration and startup
+async def main():
+    import os
+    logging.basicConfig(level=logging.INFO)
+    
+    config = MISPConfig(
+        url=os.getenv("MISP_URL", ""),
+        key=os.getenv("MISP_KEY", ""),
+        verifycert=os.getenv("MISP_VERIFYCERT", "true").lower() == "true"
+    )
+    
+    server = MicrosoftMISPServer(config)
+    await server.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Container Configuration Section -->
+            <section id="docker" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="section-title">
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #2563eb;">
+                                <path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5s-.96.06-1.42.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09C6.04 10.33 6 10.66 6 11v1h12v-1c0-.34-.04-.67-.09-1H20V8z"/>
+                            </svg>
+                            Container Configuration
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="code-section">
+                            <h3>Container Compose</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="language">yaml</span>
+                                    <span class="filename">docker-compose.yml</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>version: '3.8'
+
+services:
+  splunk-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.splunk
+    environment:
+      - SPLUNK_HOST=${SPLUNK_HOST}
+      - SPLUNK_PORT=${SPLUNK_PORT}
+      - SPLUNK_USERNAME=${SPLUNK_USERNAME}
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_TOKEN=${SPLUNK_TOKEN}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    
+  crowdstrike-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.crowdstrike
+    environment:
+      - CROWDSTRIKE_CLIENT_ID=${CROWDSTRIKE_CLIENT_ID}
+      - CROWDSTRIKE_CLIENT_SECRET=${CROWDSTRIKE_CLIENT_SECRET}
+      - CROWDSTRIKE_BASE_URL=${CROWDSTRIKE_BASE_URL}
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    
+  misp-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.misp
+    environment:
+      - MISP_URL=${MISP_URL}
+      - MISP_KEY=${MISP_KEY}
+      - MISP_VERIFYCERT=${MISP_VERIFYCERT}
+    ports:
+      - "8082:8080"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: mcp-security-network</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="code-section">
+                            <h3>Dockerfile Template</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="language">dockerfile</span>
+                                    <span class="filename">Dockerfile</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code># Dockerfile template for MCP Security Servers
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY src/ ./src/
+COPY config/ ./config/
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash mcp && \
+    chown -R mcp:mcp /app
+USER mcp
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8080/health')"
+
+# Default command
+CMD ["python", "src/server.py"]</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testing Section -->
+            <section id="tests" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="section-title">
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #22c55e;">
+                                <path d="M7 2v11h3v9l7-12h-4l3-8z"/>
+                            </svg>
+                            Unit Tests
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="code-section">
+                            <h3>Test Suite Example</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="language">python</span>
+                                    <span class="filename">test_mcp_servers.py</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>#!/usr/bin/env python3
+"""
+Unit tests for MCP Security Servers
+"""
+
+import pytest
+import asyncio
+from unittest.mock import Mock, AsyncMock, patch
+from src.splunk_mcp_server import SplunkMCPServer, SplunkConfig
+from src.crowdstrike_mcp_server import CrowdStrikeMCPServer, CrowdStrikeConfig
+from src.misp_mcp_server import MicrosoftMISPServer, MISPConfig
+
+class TestSplunkMCPServer:
+    """Test cases for Splunk MCP Server"""
+    
+    @pytest.fixture
+    def splunk_config(self):
+        return SplunkConfig(
+            host="test-splunk.local",
+            port=8089,
+            username="testuser",
+            password="testpass"
+        )
+    
+    @pytest.fixture
+    def splunk_server(self, splunk_config):
+        return SplunkMCPServer(splunk_config)
+    
+    @pytest.mark.asyncio
+    async def test_authentication(self, splunk_server):
+        """Test Splunk authentication process"""
+        with patch('httpx.AsyncClient') as mock_client:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.text = '''<?xml version="1.0" encoding="UTF-8"?>
+                <response>
+                    <sessionKey>test-session-key</sessionKey>
+                </response>'''
+            
+            mock_client.return_value.post = AsyncMock(return_value=mock_response)
+            
+            await splunk_server._ensure_authenticated()
+            assert splunk_server.session_key == "test-session-key"
+    
+    @pytest.mark.asyncio
+    async def test_search_events(self, splunk_server):
+        """Test event search functionality"""
+        with patch.object(splunk_server, '_ensure_authenticated'), \
+             patch.object(splunk_server, '_get_search_results') as mock_results:
+            
+            mock_results.return_value = [
+                {"_time": "2024-01-01T00:00:00.000+00:00", "event": "test event"}
+            ]
+            
+            # Mock the search job creation
+            mock_response = Mock()
+            mock_response.status_code = 201
+            mock_response.text = '<sid>test-job-id</sid>'
+            
+            splunk_server.client = Mock()
+            splunk_server.client.post = AsyncMock(return_value=mock_response)
+            
+            # Test the search
+            results = await splunk_server.server.tools["search-events"](
+                "index=security error"
+            )
+            
+            assert len(results) == 1
+            assert results[0]["event"] == "test event"
+
+class TestCrowdStrikeMCPServer:
+    """Test cases for CrowdStrike MCP Server"""
+    
+    @pytest.fixture
+    def crowdstrike_config(self):
+        return CrowdStrikeConfig(
+            client_id="test-client-id",
+            client_secret="test-client-secret"
+        )
+    
+    @pytest.fixture
+    def crowdstrike_server(self, crowdstrike_config):
+        return CrowdStrikeMCPServer(crowdstrike_config)
+    
+    @pytest.mark.asyncio
+    async def test_oauth_authentication(self, crowdstrike_server):
+        """Test OAuth authentication flow"""
+        with patch('httpx.AsyncClient') as mock_client:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "access_token": "test-access-token",
+                "token_type": "bearer",
+                "expires_in": 3600
+            }
+            
+            mock_client.return_value.post = AsyncMock(return_value=mock_response)
+            
+            await crowdstrike_server._ensure_authenticated()
+            assert crowdstrike_server.access_token == "test-access-token"
+
+class TestMicrosoftMISPServer:
+    """Test cases for Microsoft MISP Server"""
+    
+    @pytest.fixture
+    def misp_config(self):
+        return MISPConfig(
+            url="https://test-misp.local",
+            key="test-api-key"
+        )
+    
+    @pytest.fixture
+    def misp_server(self, misp_config):
+        return MicrosoftMISPServer(misp_config)
+    
+    @pytest.mark.asyncio
+    async def test_search_events(self, misp_server):
+        """Test MISP event search"""
+        with patch('httpx.AsyncClient') as mock_client:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "response": [
+                    {
+                        "Event": {
+                            "id": "1",
+                            "info": "Test threat event",
+                            "published": True
+                        }
+                    }
+                ]
+            }
+            
+            mock_client.return_value.post = AsyncMock(return_value=mock_response)
+            misp_server.client = mock_client.return_value
+            
+            results = await misp_server.server.tools["search-events"]("malware")
+            
+            assert len(results) == 1
+            assert results[0]["Event"]["info"] == "Test threat event"
+
+# Integration tests
+class TestIntegration:
+    """Integration tests for all MCP servers"""
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_server_startup(self):
+        """Test that all servers can start concurrently"""
+        configs = [
+            SplunkConfig(host="localhost", username="test", password="test"),
+            CrowdStrikeConfig(client_id="test", client_secret="test"),
+            MISPConfig(url="https://localhost", key="test")
+        ]
+        
+        servers = [
+            SplunkMCPServer(configs[0]),
+            CrowdStrikeMCPServer(configs[1]),
+            MicrosoftMISPServer(configs[2])
+        ]
+        
+        # Mock the authentication methods
+        for server in servers:
+            if hasattr(server, '_ensure_authenticated'):
+                server._ensure_authenticated = AsyncMock()
+            if hasattr(server, '_ensure_client'):
+                server._ensure_client = AsyncMock()
+        
+        # Test that all servers initialize without errors
+        assert all(server.server.name for server in servers)
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="code-section">
+                            <h3>Requirements.txt</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="language">text</span>
+                                    <span class="filename">requirements.txt</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code># Core MCP dependencies
+mcp>=0.1.0
+asyncio
+httpx>=0.24.0
+pydantic>=2.0.0
+
+# Security platform SDKs
+splunk-sdk>=1.7.0
+crowdstrike-falconpy>=1.3.0
+pymisp>=2.4.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Logging and monitoring
+structlog>=23.0.0
+prometheus-client>=0.16.0
+
+# Configuration management
+python-dotenv>=1.0.0
+pyyaml>=6.0.0
+
+# Security and authentication
+cryptography>=40.0.0
+pyjwt>=2.8.0
+
+# HTTP and API utilities
+requests>=2.31.0
+urllib3>=2.0.0
+certifi>=2023.0.0</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Start Section -->
+            <div class="quick-start">
+                <div class="card">
+                    <div class="card-content">
+                        <h3 class="quick-start-title">
+                            <svg class="quick-start-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            Quick Start
+                        </h3>
+                        <ol class="quick-start-list">
+                            <li>Clone the repository and set up environment variables</li>
+                            <li>Install dependencies: <code class="inline-code">pip install -r requirements.txt</code></li>
+                            <li>Configure your security platform credentials</li>
+                            <li>Run tests: <code class="inline-code">pytest tests/</code></li>
+                            <li>Start servers: <code class="inline-code">docker-compose up -d</code></li>
+                        </ol>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 Security MCP Documentation. Built for GitHub Pages.</p>
-            <p>Repository: <a href="https://github.com/jmstar85/SecurityMCP" target="_blank">github.com/jmstar85/SecurityMCP</a></p>
-        </div>
-    </footer>
+        </main>
+    </div>
 
     <script src="./assets/script.js"></script>
 </body>
