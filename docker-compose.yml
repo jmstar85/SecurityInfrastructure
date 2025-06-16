@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  splunk-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.splunk
+    environment:
+      - SPLUNK_HOST=${SPLUNK_HOST}
+      - SPLUNK_PORT=${SPLUNK_PORT}
+      - SPLUNK_USERNAME=${SPLUNK_USERNAME}
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_TOKEN=${SPLUNK_TOKEN}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    
+  crowdstrike-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.crowdstrike
+    environment:
+      - CROWDSTRIKE_CLIENT_ID=${CROWDSTRIKE_CLIENT_ID}
+      - CROWDSTRIKE_CLIENT_SECRET=${CROWDSTRIKE_CLIENT_SECRET}
+      - CROWDSTRIKE_BASE_URL=${CROWDSTRIKE_BASE_URL}
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    
+  misp-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.misp
+    environment:
+      - MISP_URL=${MISP_URL}
+      - MISP_KEY=${MISP_KEY}
+      - MISP_VERIFYCERT=${MISP_VERIFYCERT}
+    ports:
+      - "8082:8080"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: mcp-security-network

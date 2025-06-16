@@ -1,0 +1,27 @@
+# Splunk SIEM Configuration
+splunk:
+  host: "your-splunk-server.com"
+  port: 8089
+  username: "admin"
+  password: "your-password"
+  # OR use token-based auth
+  token: "your-api-token"
+  verify_ssl: true
+  default_index: "security"
+
+# Search Configuration
+search:
+  max_results: 10000
+  timeout: 300
+  earliest_time: "-24h"
+  latest_time: "now"
+
+# Alert Configuration
+alerts:
+  email_notifications: true
+  webhook_url: "https://your-webhook-endpoint.com"
+  severity_levels:
+    - critical
+    - high
+    - medium
+    - low
