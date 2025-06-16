@@ -54,13 +54,16 @@ This application is designed to run as a full-stack Express application. For dep
 
 1. Run the deployment build:
 ```bash
-node build-for-deployment.js
+node quick-build.js
 ```
 
 2. Configure your deployment platform:
    - **Deployment Type**: Autoscale (not Static)
+   - **Build Command**: `node quick-build.js`
    - **Public Directory**: `dist/server/public`
    - **Run Command**: `node dist/start.js`
+
+> **Important**: This is a full-stack Express application. Static deployment will not work as it cannot run the server code that handles API endpoints.
 
 ### Manual Build Process
 
