@@ -1,76 +1,76 @@
 # Security Infrastructure MCP Servers
 
-포괄적인 보안 플랫폼 통합을 위한 MCP (Model Context Protocol) 서버 구현체 모음입니다.
+A comprehensive collection of MCP (Model Context Protocol) server implementations for security platform integrations.
 
-## 🔐 지원 플랫폼
+## 🔐 Supported Platforms
 
 ### Splunk SIEM
-- 보안 정보 및 이벤트 관리
-- SPL 쿼리 실행 및 결과 분석
-- 실시간 알림 및 대시보드 관리
+- Security Information and Event Management
+- SPL query execution and result analysis
+- Real-time alerting and dashboard management
 
 ### CrowdStrike EDR  
-- 엔드포인트 탐지 및 대응
-- 위협 헌팅 및 사고 조사
-- 호스트 관리 및 정책 배포
+- Endpoint Detection and Response
+- Threat hunting and incident investigation
+- Host management and policy deployment
 
 ### Microsoft MISP
-- 위협 정보 공유 플랫폼
-- IOC 검색 및 분석
-- 위협 인텔리전스 피드 관리
+- Threat Intelligence Sharing Platform
+- IOC search and analysis
+- Threat intelligence feed management
 
-## 📖 라이브 문서
+## 📖 Live Documentation
 
-**전체 문서 및 코드 예제**: [https://jmstar85.github.io/SecurityInfrastructure](https://jmstar85.github.io/SecurityInfrastructure)
+**Complete documentation and code examples**: [https://jmstar85.github.io/SecurityInfrastructure](https://jmstar85.github.io/SecurityInfrastructure)
 
-라이브 문서에서 제공되는 기능:
-- 📋 완전한 서버 구현 코드
-- 🔍 실시간 검색 및 필터링
-- 📱 반응형 모바일 지원
-- 📑 코드 복사 기능
-- 🗂️ 카테고리별 정리
+Features available in the live documentation:
+- 📋 Complete server implementation code
+- 🔍 Real-time search and filtering
+- 📱 Responsive mobile support
+- 📑 One-click code copying
+- 🗂️ Organized by categories
 
-## 🚀 빠른 시작
+## 🚀 Quick Start
 
 ```bash
-# 1. 저장소 복제
+# 1. Clone the repository
 git clone https://github.com/jmstar85/SecurityInfrastructure.git
 cd SecurityInfrastructure
 
-# 2. 의존성 설치
-pip install -r requirements.txt
+# 2. Install dependencies
+pip install -r project-requirements.txt
 
-# 3. 환경 변수 설정
+# 3. Setup environment variables
 cp .env.example .env
-# .env 파일에 API 키 및 자격증명 입력
+# Edit .env file with your API keys and credentials
 
-# 4. 테스트 실행
+# 4. Run tests
 pytest tests/
 
-# 5. 서버 시작
+# 5. Start servers
 docker-compose up -d
 ```
 
-## 📁 프로젝트 구조
+## 📁 Project Structure
 
 ```
 SecurityInfrastructure/
-├── docs/                    # GitHub Pages 문서
-│   ├── index.html          # 메인 문서 페이지
-│   └── assets/             # CSS, JS 리소스
-├── src/                    # MCP 서버 소스 코드
-│   ├── splunk_server.py    # Splunk SIEM 통합
-│   ├── crowdstrike_server.py # CrowdStrike EDR 통합
-│   └── misp_server.py      # Microsoft MISP 통합
-├── tests/                  # 단위 테스트
-├── config/                 # 설정 파일
-├── docker-compose.yml      # 컨테이너 구성
-└── requirements.txt        # Python 의존성
+├── docs/                    # GitHub Pages documentation
+│   ├── index.html          # Main documentation page
+│   └── assets/             # CSS, JS resources
+├── src/                    # MCP server source code
+│   ├── splunk_server.py    # Splunk SIEM integration
+│   ├── crowdstrike_server.py # CrowdStrike EDR integration
+│   └── misp_server.py      # Microsoft MISP integration
+├── tests/                  # Unit tests
+├── config/                 # Configuration files
+├── docker-compose.yml      # Container configuration
+└── project-requirements.txt # Python dependencies
 ```
 
-## 🔧 설정 예제
+## 🔧 Configuration Examples
 
-### Splunk 연결
+### Splunk Connection
 ```yaml
 splunk:
   host: "your-splunk-server.com"
@@ -80,7 +80,7 @@ splunk:
   verify_ssl: true
 ```
 
-### CrowdStrike 인증
+### CrowdStrike Authentication
 ```yaml
 crowdstrike:
   client_id: "your-client-id"
@@ -88,7 +88,7 @@ crowdstrike:
   base_url: "https://api.crowdstrike.com"
 ```
 
-### MISP 설정
+### MISP Setup
 ```yaml
 misp:
   url: "https://your-misp-instance.com"
@@ -96,39 +96,39 @@ misp:
   verifycert: true
 ```
 
-## 🛠️ 주요 기능
+## 🛠️ Key Features
 
-- **비동기 API 호출**: 모든 플랫폼과의 효율적인 통신
-- **에러 핸들링**: 강건한 오류 처리 및 재시도 로직
-- **보안 인증**: 토큰 기반 및 OAuth 2.0 지원
-- **로깅 시스템**: 구조화된 로그 및 모니터링
-- **테스트 커버리지**: 포괄적인 단위 테스트 및 통합 테스트
+- **Asynchronous API Calls**: Efficient communication with all platforms
+- **Error Handling**: Robust error handling and retry logic
+- **Security Authentication**: Token-based and OAuth 2.0 support
+- **Logging System**: Structured logging and monitoring
+- **Test Coverage**: Comprehensive unit and integration tests
 
-## 📋 요구사항
+## 📋 Requirements
 
 - Python 3.11+
 - Docker & Docker Compose
-- 해당 보안 플랫폼 접근 권한
+- Access credentials for respective security platforms
 
-## 🤝 기여하기
+## 🤝 Contributing
 
-1. Fork 저장소 생성
-2. 기능 브랜치 생성 (`git checkout -b feature/새기능`)
-3. 변경사항 커밋 (`git commit -am '새 기능 추가'`)
-4. 브랜치에 Push (`git push origin feature/새기능`)
-5. Pull Request 생성
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Create a Pull Request
 
-## 📄 라이센스
+## 📄 License
 
-이 프로젝트는 보안 연구 및 교육 목적으로 제공됩니다.
+This project is provided for security research and educational purposes.
 
-## 🔗 관련 링크
+## 🔗 Related Links
 
-- [MCP 프로토콜 문서](https://github.com/anthropics/mcp)
-- [Splunk API 문서](https://docs.splunk.com/Documentation/Splunk/latest/RESTREF)
-- [CrowdStrike API 문서](https://falcon.crowdstrike.com/documentation)
-- [MISP API 문서](https://www.misp-project.org/openapi/)
+- [MCP Protocol Documentation](https://github.com/anthropics/mcp)
+- [Splunk API Documentation](https://docs.splunk.com/Documentation/Splunk/latest/RESTREF)
+- [CrowdStrike API Documentation](https://falcon.crowdstrike.com/documentation)
+- [MISP API Documentation](https://www.misp-project.org/openapi/)
 
 ---
 
-⭐ **유용하다면 스타를 눌러주세요!**
+⭐ **If you find this useful, please give it a star!**

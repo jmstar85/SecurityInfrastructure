@@ -1,37 +1,37 @@
 # Security Infrastructure MCP Servers
 
-보안 플랫폼을 위한 포괄적인 MCP (Model Context Protocol) 서버 구현체입니다.
+Comprehensive MCP (Model Context Protocol) server implementations for security platform integrations.
 
-## 포함된 통합 시스템
+## Integrated Systems
 
-- **Splunk SIEM**: 보안 정보 및 이벤트 관리를 위한 포괄적인 검색 및 분석 기능
-- **CrowdStrike EDR**: 위협 탐지 및 사고 대응을 위한 엔드포인트 탐지 및 대응 플랫폼 통합
-- **Microsoft MISP**: 위협 정보 공유를 위한 악성코드 정보 공유 플랫폼 통합
+- **Splunk SIEM**: Comprehensive search and analytics capabilities for Security Information and Event Management
+- **CrowdStrike EDR**: Endpoint Detection and Response platform integration for threat hunting and incident response
+- **Microsoft MISP**: Malware Information Sharing Platform integration for threat intelligence sharing
 
-## 라이브 문서
+## Live Documentation
 
-실시간 문서는 다음에서 확인할 수 있습니다: [GitHub Pages](https://jmstar85.github.io/SecurityInfrastructure)
+The real-time documentation is available at: [GitHub Pages](https://jmstar85.github.io/SecurityInfrastructure)
 
-## 특징
+## Features
 
-- **대화형 검색**: 모든 코드 예제에서 키워드 검색 가능
-- **카테고리 필터링**: SIEM, EDR, 위협 정보별로 필터링
-- **코드 복사**: 원클릭 코드 복사 기능
-- **반응형 디자인**: 데스크톱 및 모바일에서 최적화
-- **키보드 단축키**: Ctrl+K로 검색, ESC로 검색 초기화
+- **Interactive Search**: Keyword search across all code examples
+- **Category Filtering**: Filter by SIEM, EDR, or Threat Intelligence
+- **Code Copying**: One-click code copying functionality
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Keyboard Shortcuts**: Ctrl+K for search, ESC to clear search
 
-## 빠른 시작
+## Quick Start
 
-1. 저장소 복제 및 환경 변수 설정
-2. 의존성 설치: `pip install -r requirements.txt`
-3. 보안 플랫폼 자격 증명 구성
-4. 테스트 실행: `pytest tests/`
-5. 서버 시작: `docker-compose up -d`
+1. Clone repository and setup environment variables
+2. Install dependencies: `pip install -r project-requirements.txt`
+3. Configure security platform credentials
+4. Run tests: `pytest tests/`
+5. Start servers: `docker-compose up -d`
 
-## 기여
+## Contributing
 
-추가적인 보안 MCP 서버 예제나 문서 개선사항에 대한 풀 리퀘스트를 환영합니다.
+Pull requests for additional security MCP server examples or documentation improvements are welcome.
 
-## 라이센스
+## License
 
-이 프로젝트는 보안 연구 및 교육 목적으로 제공됩니다.
+This project is provided for security research and educational purposes.
