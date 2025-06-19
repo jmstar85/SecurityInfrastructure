@@ -146,6 +146,7 @@ SecurityInfrastructure/
 ```
 
 **Complete setup instructions:** See [INSTALLATION.md](INSTALLATION.md) for detailed configuration guide.
+**Quick setup:** See [setup-guide.md](setup-guide.md) for copy-paste configuration templates.
 
 ## 💻 Usage Examples
 
