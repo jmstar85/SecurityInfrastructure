@@ -38,19 +38,30 @@ Features available in the live documentation:
 
 ## 🚀 Quick Start
 
+### For MCP Client Integration (Claude Desktop)
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/jmstar85/SecurityInfrastructure.git
 cd SecurityInfrastructure
 
-# 2. Install Python dependencies
+# 2. Install dependencies
 pip install -r project-requirements.txt
 
-# 3. Configure your security platforms
-# Edit config/splunk.yaml, config/crowdstrike.yaml, config/misp.yaml
-# Add your API credentials and connection settings
+# 3. Configure credentials
+cp .env.example .env
+# Edit .env with your platform credentials
 
-# 4. Start individual MCP servers
+# 4. Add to Claude Desktop configuration
+# Copy config/mcp-settings.json content to your Claude Desktop config
+# Location: ~/Library/Application Support/Claude/claude_desktop_config.json (macOS)
+# Update the "cwd" paths and environment variables with your values
+```
+
+### For Standalone Server Usage
+
+```bash
+# Start individual MCP servers
 python src/splunk_server.py        # Runs on localhost:8080
 python src/crowdstrike_server.py   # Runs on localhost:8081
 python src/misp_server.py          # Runs on localhost:8082
@@ -58,7 +69,7 @@ python src/misp_server.py          # Runs on localhost:8082
 # Or use Docker for all services
 docker-compose up -d
 
-# 5. Run tests to verify connectivity
+# Run tests to verify connectivity
 pytest tests/test_mcp_servers.py -v
 ```
 
@@ -100,10 +111,75 @@ SecurityInfrastructure/
 │   ├── splunk_server.py    # Splunk SIEM integration
 │   ├── crowdstrike_server.py # CrowdStrike EDR integration
 │   └── misp_server.py      # Microsoft MISP integration
-├── tests/                  # Unit tests
 ├── config/                 # Configuration files
+│   └── mcp-settings.json   # MCP client configuration template
+├── tests/                  # Unit tests
+├── mcp-config.json         # Basic MCP configuration
+├── .env.example            # Environment variables template
+├── INSTALLATION.md         # Detailed setup guide
 ├── docker-compose.yml      # Container configuration
 └── project-requirements.txt # Python dependencies
+```
+
+## 🔧 MCP Client Configuration
+
+### Claude Desktop Setup
+
+**Configuration File Location:**
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Basic Configuration:**
+```json
+{
+  "mcpServers": {
+    "security-infrastructure-splunk": {
+      "command": "python",
+      "args": ["/path/to/SecurityInfrastructure/src/splunk_server.py"],
+      "env": {
+        "SPLUNK_HOST": "your-splunk-host.com",
+        "SPLUNK_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+**Complete setup instructions:** See [INSTALLATION.md](INSTALLATION.md) for detailed configuration guide.
+
+## 💻 Usage Examples
+
+Once configured with Claude Desktop, you can use natural language to interact with your security platforms:
+
+### Splunk SIEM Queries
+```
+"Search for failed SSH login attempts in the last 6 hours"
+"Find all authentication events from IP 192.168.1.100"  
+"Show me high priority security alerts from yesterday"
+"Search for events in the security index containing 'malware'"
+```
+
+### CrowdStrike EDR Queries  
+```
+"Show me all high severity detections from today"
+"Find endpoint detections with 'ransomware' behavior"
+"List recent detections sorted by creation time"
+"Search for detections on hostname 'web-server-01'"
+```
+
+### MISP Threat Intelligence
+```
+"Search for events related to APT29"
+"Find all IP address indicators of compromise"
+"Look up domain indicators from the last week"
+"Search for published threat intelligence events about phishing"
+```
+
+### Cross-Platform Analysis
+```
+"Search Splunk for events related to this CrowdStrike detection ID"
+"Check MISP for threat intelligence on this suspicious IP from Splunk"
+"Correlate this endpoint detection with known threat indicators"
 ```
 
 ## 🔧 Configuration Examples
@@ -163,8 +239,26 @@ misp:
 ## 📋 Requirements
 
 - Python 3.11+
-- Docker & Docker Compose
-- Access credentials for respective security platforms
+- Access credentials for security platforms (API keys, tokens)
+- MCP-compatible client (Claude Desktop, or other MCP clients)
+- Docker & Docker Compose (optional, for containerized deployment)
+
+## 🔐 Required Credentials
+
+### Splunk SIEM
+- **API Token** (recommended) or Username/Password
+- **Host/Port** information for your Splunk instance
+- **Search permissions** on target indexes
+
+### CrowdStrike EDR
+- **Client ID** and **Client Secret** from Falcon Console
+- API permissions: Detections (READ), Hosts (READ), Incidents (READ)
+- Appropriate **Base URL** for your region
+
+### Microsoft MISP
+- **API Key** generated from MISP user profile
+- **MISP instance URL**
+- Read access to events and attributes
 
 ## 🤝 Contributing
 

@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "security-infrastructure-splunk": {
+      "command": "python",
+      "args": ["src/splunk_server.py"],
+      "cwd": ".",
+      "env": {
+        "SPLUNK_HOST": "",
+        "SPLUNK_PORT": "8089", 
+        "SPLUNK_USERNAME": "",
+        "SPLUNK_PASSWORD": "",
+        "SPLUNK_TOKEN": "",
+        "SPLUNK_VERIFY_SSL": "true",
+        "SPLUNK_INDEX": "main"
+      }
+    },
+    "security-infrastructure-crowdstrike": {
+      "command": "python", 
+      "args": ["src/crowdstrike_server.py"],
+      "cwd": ".",
+      "env": {
+        "CROWDSTRIKE_CLIENT_ID": "",
+        "CROWDSTRIKE_CLIENT_SECRET": "",
+        "CROWDSTRIKE_BASE_URL": "https://api.crowdstrike.com",
+        "CROWDSTRIKE_MEMBER_CID": ""
+      }
+    },
+    "security-infrastructure-misp": {
+      "command": "python",
+      "args": ["src/misp_server.py"], 
+      "cwd": ".",
+      "env": {
+        "MISP_URL": "",
+        "MISP_KEY": "",
+        "MISP_VERIFY_CERT": "true",
+        "MISP_TIMEOUT": "300"
+      }
+    }
+  }
+}
