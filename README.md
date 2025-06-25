@@ -27,8 +27,6 @@ A comprehensive collection of MCP (Model Context Protocol) server implementation
 
 ## 📖 Live Documentation
 
-**Complete documentation and code examples**: [https://jmstar85.github.io/SecurityInfrastructure](https://jmstar85.github.io/SecurityInfrastructure)
-
 Features available in the live documentation:
 - 📋 Complete server implementation code
 - 🔍 Real-time search and filtering
