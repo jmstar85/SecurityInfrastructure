@@ -1,11 +1,11 @@
 # Splunk SIEM Configuration
 splunk:
-  host: "your-splunk-server.com"
+  host: "REPLACE_WITH_YOUR_SPLUNK_HOST"
   port: 8089
-  username: "admin"
-  password: "your-password"
+  username: "REPLACE_WITH_YOUR_USERNAME"
+  password: "REPLACE_WITH_YOUR_PASSWORD"
   # OR use token-based auth
-  token: "your-api-token"
+  token: "REPLACE_WITH_YOUR_API_TOKEN"
   verify_ssl: true
   default_index: "security"
 

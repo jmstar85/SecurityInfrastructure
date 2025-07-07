@@ -59,12 +59,18 @@ class MicrosoftMISPServer:
                     "returnFormat": "json"
                 }
                 
+                # Validate and sanitize inputs
                 if query:
+                    query = self._sanitize_input(query)
                     search_params["eventinfo"] = query
                 if event_type:
+                    event_type = self._sanitize_input(event_type)
                     search_params["type"] = event_type
                 if published is not None:
                     search_params["published"] = published
+                
+                # Limit search results
+                limit = min(max(1, limit), 1000)
                 
                 response = await self.client.post(
                     f"{self.config.url}/events/restSearch",
@@ -79,8 +85,8 @@ class MicrosoftMISPServer:
                     raise Exception(f"Failed to search events: {response.text}")
                     
             except Exception as e:
-                self.logger.error(f"Search events failed: {e}")
-                return {"error": str(e)}
+                self.logger.error(f"Search events failed: {str(e)}")
+                return {"error": "Failed to search events. Please check your query and try again."}
         
         @self.server.tool("search-attributes")
         async def search_attributes(value: str = "", type: str = "", 
@@ -102,12 +108,19 @@ class MicrosoftMISPServer:
                     "returnFormat": "json"
                 }
                 
+                # Validate and sanitize inputs
                 if value:
+                    value = self._sanitize_input(value)
                     search_params["value"] = value
                 if type:
+                    type = self._sanitize_input(type)
                     search_params["type"] = type
                 if category:
+                    category = self._sanitize_input(category)
                     search_params["category"] = category
+                
+                # Limit search results
+                limit = min(max(1, limit), 1000)
                 
                 response = await self.client.post(
                     f"{self.config.url}/attributes/restSearch",
@@ -122,8 +135,8 @@ class MicrosoftMISPServer:
                     raise Exception(f"Failed to search attributes: {response.text}")
                     
             except Exception as e:
-                self.logger.error(f"Search attributes failed: {e}")
-                return {"error": str(e)}
+                self.logger.error(f"Search attributes failed: {str(e)}")
+                return {"error": "Failed to search attributes. Please check your query and try again."}
     
     def _get_headers(self) -> Dict[str, str]:
         """Get request headers with authentication"""
@@ -136,8 +149,13 @@ class MicrosoftMISPServer:
     async def _ensure_client(self):
         """Ensure HTTP client is initialized"""
         if not self.client:
+            # Force SSL verification for security
+            verify_ssl = self.config.verifycert
+            if not verify_ssl:
+                self.logger.warning("SSL verification is disabled. This is not recommended for production.")
+            
             self.client = httpx.AsyncClient(
-                verify=self.config.verifycert,
+                verify=verify_ssl,
                 timeout=self.config.timeout,
                 proxies=self.config.proxies
             )
@@ -146,6 +164,37 @@ class MicrosoftMISPServer:
         """Start the MCP server"""
         self.logger.info(f"Starting MISP MCP Server on {host}:{port}")
         await self.server.run(host=host, port=port)
+    
+    def _sanitize_input(self, input_str: str) -> str:
+        """Sanitize input strings to prevent injection attacks"""
+        if not input_str or len(input_str) > 1000:
+            raise ValueError("Input is empty or too long")
+        
+        # Remove control characters and potential injection patterns
+        import re
+        sanitized = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', input_str)
+        
+        # Remove potential script tags or SQL injection patterns
+        dangerous_patterns = [
+            r'<script[^>]*>.*?</script>',
+            r'javascript:',
+            r'vbscript:',
+            r'on\w+\s*=',
+            r'union\s+select',
+            r'drop\s+table',
+            r'delete\s+from',
+            r'insert\s+into'
+        ]
+        
+        for pattern in dangerous_patterns:
+            if re.search(pattern, sanitized, re.IGNORECASE):
+                raise ValueError("Input contains potentially dangerous content")
+        
+        return sanitized.strip()
+    
+    def _register_resources(self):
+        """Register available resources"""
+        pass
 
 async def main():
     import os

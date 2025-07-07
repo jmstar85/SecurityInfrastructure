@@ -7,11 +7,11 @@
         "src.splunk_server"
       ],
       "env": {
-        "SPLUNK_HOST": "your-splunk-host.com",
+        "SPLUNK_HOST": "REPLACE_WITH_YOUR_SPLUNK_HOST",
         "SPLUNK_PORT": "8089",
-        "SPLUNK_USERNAME": "admin",
-        "SPLUNK_PASSWORD": "your-password",
-        "SPLUNK_TOKEN": "your-api-token",
+        "SPLUNK_USERNAME": "REPLACE_WITH_YOUR_USERNAME",
+        "SPLUNK_PASSWORD": "REPLACE_WITH_YOUR_PASSWORD",
+        "SPLUNK_TOKEN": "REPLACE_WITH_YOUR_API_TOKEN",
         "SPLUNK_VERIFY_SSL": "true",
         "SPLUNK_INDEX": "main"
       }
@@ -23,10 +23,10 @@
         "src.crowdstrike_server"
       ],
       "env": {
-        "CROWDSTRIKE_CLIENT_ID": "your-client-id",
-        "CROWDSTRIKE_CLIENT_SECRET": "your-client-secret",
+        "CROWDSTRIKE_CLIENT_ID": "REPLACE_WITH_YOUR_CLIENT_ID",
+        "CROWDSTRIKE_CLIENT_SECRET": "REPLACE_WITH_YOUR_CLIENT_SECRET",
         "CROWDSTRIKE_BASE_URL": "https://api.crowdstrike.com",
-        "CROWDSTRIKE_MEMBER_CID": "your-member-cid"
+        "CROWDSTRIKE_MEMBER_CID": "REPLACE_WITH_YOUR_MEMBER_CID"
       }
     },
     "misp-threat-intel": {
@@ -36,8 +36,8 @@
         "src.misp_server"
       ],
       "env": {
-        "MISP_URL": "https://your-misp-instance.com",
-        "MISP_KEY": "your-api-key",
+        "MISP_URL": "REPLACE_WITH_YOUR_MISP_URL",
+        "MISP_KEY": "REPLACE_WITH_YOUR_API_KEY",
         "MISP_VERIFY_CERT": "true",
         "MISP_TIMEOUT": "300"
       }
